@@ -59,13 +59,14 @@ fn main() {
 
     let floodsub_topic = floodsub::TopicBuilder::new("chat").build();
 
-    let mut behaviour = MyBehaviour {
-        floodsub: Floodsub::new(local_peer_id.clone()),
-        mdns: Mdns::new().expect("Failed to create mDNS service"),
+    let mut swarm = {
+        let mut behaviour = MyBehaviour {
+            floodsub: Floodsub::new(local_peer_id.clone()),
+            mdns: Mdns::new().expect("Failed to create mDNS service"),
+        };
+        behaviour.floodsub.subscribe(floodsub_topic.clone());
+        Swarm::new(transport, behaviour, local_peer_id)
     };
-    behaviour.floodsub.subscribe(floodsub_topic.clone());
-
-    let mut swarm = Swarm::new(transport, behaviour, local_peer_id);
 
     if let Some(to_dial) = env::args().nth(1) {
         let dialing = to_dial.clone();
