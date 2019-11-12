@@ -1,3 +1,4 @@
+use crate::playback;
 use futures::{future, prelude::*};
 use libp2p::{
     floodsub::{self, Floodsub, FloodsubEvent},
@@ -41,12 +42,19 @@ impl<TSubstream: AsyncRead + AsyncWrite> NetworkBehaviourEventProcess<FloodsubEv
     for MyBehaviour<TSubstream>
 {
     fn inject_event(&mut self, message: FloodsubEvent) {
-        if let FloodsubEvent::Message(message) = message {
-            println!(
-                "Received: '{:?}' from {:?}",
-                String::from_utf8_lossy(&message.data),
-                message.source
-            )
+        if let FloodsubEvent::Message(m) = message {
+            match String::from_utf8(m.data) {
+                Ok(data) => {
+                    if data.is_empty() {
+                        println!("Received an empty message");
+                    } else {
+                        playback::launch(data);
+                    }
+                }
+                Err(error) => {
+                    println!("Received invalid message {:?}", error);
+                }
+            }
         }
     }
 }

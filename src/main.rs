@@ -1,7 +1,9 @@
 mod network_connection;
+mod error_handler;
+mod playback;
+mod macos_debug;
 
-#[derive(Debug)]
-struct MyError {}
+use error_handler::MyError;
 
 fn main() -> Result<(), MyError> {
     network_connection::setup_network();
